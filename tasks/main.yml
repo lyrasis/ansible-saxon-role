@@ -1,0 +1,26 @@
+---
+
+- name: parse version string
+  set_fact:
+    version_parts: "{{ saxon_version | regex_findall('(?:(\\d+)\\.?|\\d+/g)') }}"
+
+- name: get major/minor version from full version string
+  set_fact:
+    major_minor: "{{ version_parts[0] + '.' + version_parts[1] }}"
+
+- name: construct the download filename
+  set_fact:
+    dl_filename: "{{ 'SaxonHE' + saxon_version | replace('.', '-' ) + 'J.zip'}}"
+
+- name: download Saxon and extract to its directory
+  unarchive:
+    src: "https://sourceforge.net/projects/saxon/files/Saxon-HE/{{ major_minor }}/{{ dl_filename }}"
+    dest: "{{ saxon_dir }}"
+    remote_src: yes
+
+# NOTE: the result of the query is on stdout, saxon & java version info is on stderr
+- name: confirm saxon is working
+  command: "java -cp {{ saxon_dir }}/saxon9he.jar net.sf.saxon.Query -t -qs:'current-date()'"
+  register: saxon_test
+  failed_when: "'{{ saxon_version }}' not in saxon_test.stderr"
+  changed_when: false
