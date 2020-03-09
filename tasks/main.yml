@@ -22,5 +22,5 @@
 - name: confirm saxon is working
   command: "java -cp {{ saxon_dir }}/saxon9he.jar net.sf.saxon.Query -t -qs:'current-date()'"
   register: saxon_test
-  failed_when: "'{{ saxon_version }}' not in saxon_test.stderr"
+  failed_when: "saxon_version not in saxon_test.stderr"
   changed_when: false
